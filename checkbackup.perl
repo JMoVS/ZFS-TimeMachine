@@ -10,6 +10,7 @@
 
 
 use JNX::Configuration;
+use POSIX qw(strftime EXIT_FAILURE EXIT_SUCCESS);
 
 my %commandlineoption = JNX::Configuration::newFromDefaults( {
 																	'host'					=>	['','string'],
@@ -47,7 +48,7 @@ my $anybarFailureColor = $commandlineoption{'anybarFailureColor'};
 
 for my $datasettotest (@datasetstotest)
 {
-	print STDERR "Testing dataset: $datasettotest\n";
+	print timestamp()."Testing dataset: $datasettotest\n";
 
 	my @snapshots		= JNX::ZFS::getsnapshotsfordataset(%host,dataset=>$datasettotest);
 	# print STDERR "Snapshots: @snapshots\n";
@@ -58,21 +59,25 @@ for my $datasettotest (@datasetstotest)
 
 	if( $snapshottime + $snapshotoffset < time() )
 	{
-		if( $lastwaketime + $snapshotoffset < time() )
+		if( $snapshottime + $warningGracePeriod + $snapshotoffset < time() )
 		{
-			print STDERR "Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - too old\n";
+			print STDERR timestamp()."Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - too old\n";
 			system("/bin/echo -n ".$anybarFailureColor." | nc -4u -w0 localhost ".$anyBarPortNumber);
 			exit 1;
 		}
 		else
 		{
-			print STDERR "Not long enough after reboot\n";
+			print STDERR timestamp()."Semi-old backups but pool available. Probably starting soon.\n";
 			system("/bin/echo -n orange | nc -4u -w0 localhost ".$anyBarPortNumber);
 			exit 0;
 		}
 	}
-	print STDERR "Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - ok\n";
+	print timestamp()."Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - ok\n";
 	system("/bin/echo -n black | nc -4u -w0 localhost ".$anyBarPortNumber);
 }
 exit 0;
 
+sub timestamp {
+
+	return (strftime "%Y-%m-%d-%H%M%S", localtime).': ';
+}

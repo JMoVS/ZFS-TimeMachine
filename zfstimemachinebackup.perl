@@ -75,7 +75,7 @@ if( $commandlineoption{createsnapshotonsource} )
 {
 	$newsnapshotname	= JNX::ZFS::createsnapshot(	%source, recursive	=> $commandlineoption{recursive} ) 		|| die "Could not create snapshot on $source{host}:$source{dataset}";
 
-	print 'Created '.($commandlineoption{recursive}?'recursive ':undef).'snapshot '.$newsnapshotname."\n";
+	print timestamp().($commandlineoption{recursive}?'recursive ':undef).'snapshot '.$newsnapshotname."\n";
 }
 
 ####
@@ -85,10 +85,10 @@ JNX::System::checkforrunningmyself($commandlineoption{sourcedataset}.$commandlin
 
 if( my $childpid = fork() )
 {
-	print "Waiting for working child to exit\n" if $commandlineoption{debug};
+	print timestamp()."Waiting for working child to exit\n" if $commandlineoption{debug};
 	wait;
 	
-	print "Child work done, deleting pid file\n" if $commandlineoption{debug};
+	print timestamp()."Child work done, deleting pid file\n" if $commandlineoption{debug};
 	my $pidfile = JNX::System::pidfilename($commandlineoption{sourcedataset}.$commandlineoption{destinationdataset});
 	unlink($pidfile);
 	exit;
@@ -102,7 +102,7 @@ if( my $childpid = fork() )
 	{
 		my @recursivedatasets = JNX::ZFS::getsubdatasets( %source );
 
-		print 'Got sourcefilesystems (before deleting unwanted ones):'.join("\n\t",@recursivedatasets)."\n" if $commandlineoption{verbose};
+		print timestamp().'Got sourcefilesystems (before deleting unwanted ones):'.join("\n\t",@recursivedatasets)."\n" if $commandlineoption{verbose};
 
 		@sourcedatasets = ();
 
@@ -112,14 +112,14 @@ if( my $childpid = fork() )
 			{
 				if( $sourcedataset =~ /^\Q$datasettoignore\E/ )
 				{
-					print 'Ignoring dataset:'.$sourcedataset."\n";
+					print timestamp().'Ignoring dataset:'.$sourcedataset."\n";
 					next WEEDOUTUNWANTEDONES;
 				}
 			}
-			print "Keeping dataset:$sourcedataset\n" if $commandlineoption{verbose};
+			print timestamp()."Keeping dataset:$sourcedataset\n" if $commandlineoption{verbose};
 			push(@sourcedatasets,$sourcedataset);
 		}
-		print "Got sourcefilesystems:".join("\n\t",@sourcedatasets)."\n" if $commandlineoption{verbose};
+		print timestamp()."Got sourcefilesystems:".join("\n\t",@sourcedatasets)."\n" if $commandlineoption{verbose};
 	}
 
 DATASET:for my $sourcedataset (@sourcedatasets)
@@ -137,12 +137,12 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 			if( $sourcedataset =~ m/$regex/ )
 			{
 				$maximumtimeforfilesystem = $value;
-				print "Matched source: $regex $sourcedataset\n" if $commandlineoption{debug};
+				print timestamp()."Matched source: $regex $sourcedataset\n" if $commandlineoption{debug};
 				last REGEXTEST;
 			}
 		}
 
-		print STDERR "Working on sourcedataset: $sourcedataset destinationdataset:$destinationdataset  Maximumtime:$maximumtimeforfilesystem\n";
+		print timestamp()."Working on sourcedataset: $sourcedataset destinationdataset:$destinationdataset  Maximumtime:$maximumtimeforfilesystem\n";
 
 		####
 		# figure out existing snapshots on both datasets
@@ -176,13 +176,13 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 			
 			if( !$lastcommonsnapshot )
 			{
-				print "Could not find common snapshot between source ($sourcedataset) and destination ($destinationdataset)\n";
-				print "Destination snapshots:\n\t".join("\n\t",@destinationsnapshots)."\n";
-				print "Source snapshots:\n\t".join("\n\t",@sourcesnapshots)."\n";
+				print timestamp()."Could not find common snapshot between source ($sourcedataset) and destination ($destinationdataset)\n";
+				print timestamp()."Destination snapshots:\n\t".join("\n\t",@destinationsnapshots)."\n";
+				print timestamp()."Source snapshots:\n\t".join("\n\t",@sourcesnapshots)."\n";
 			}
 			else
 			{
-				print 'Last common snapshot: '.$lastcommonsnapshot."\n";
+				print timestamp().'Last common snapshot: '.$lastcommonsnapshot."\n";
 				
 				if( $commandlineoption{deletesnapshotsondestination} )
 				{	
@@ -203,7 +203,7 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 					
 					if( @snapshotsnewerondestination )
 					{
-						print 'Snapshots newer on destination dataset('.$destinationdataset.'):'.$snapshotsnewerondestination[0].(@snapshotsnewerondestination>1?' - '.$snapshotsnewerondestination[-1]:undef)."\n";
+						print timestamp().'Snapshots newer on destination dataset('.$destinationdataset.'):'.$snapshotsnewerondestination[0].(@snapshotsnewerondestination>1?' - '.$snapshotsnewerondestination[-1]:undef)."\n";
 						
 						for my $snapshotname (@snapshotsnewerondestination)
 						{
@@ -222,7 +222,7 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 		####
 		if( $lastcommonsnapshot eq $snapshotdate )
 		{
-			print "Did not find newer snapshot on source $sourcedataset\n" if $commandlineoption{verbose};
+			print timestamp()."Did not find newer snapshot on source $sourcedataset\n" if $commandlineoption{verbose};
 		}
 		else
 		{
@@ -283,7 +283,7 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 			{
 				splice(@snapshotstodelete,-1* $snapshotstokeeponsource);
 				
-				print 'Snapshots to delete on source ('.$sourcedataset.'): '.$snapshotstodelete[0].(@snapshotstodelete>1?' - '.$snapshotstodelete[-1]:undef)."\n";
+				print timestamp().'Snapshots to delete on source ('.$sourcedataset.'): '.$snapshotstodelete[0].(@snapshotstodelete>1?' - '.$snapshotstodelete[-1]:undef)."\n";
 				
 				for my $snapshotname (@snapshotstodelete)
 				{
@@ -335,18 +335,18 @@ DATASET:for my $sourcedataset (@sourcedatasets)
 					if( $keepsnapshot )
 					{
 						$backupbuckets{$bucket}=$snapshotname;
-						print 'Will keep snapshot:  '.$snapshotname.'='.$snapshottime.' Backup in bucket: $backupbucket{'.$bucket.'}='.$backupbuckets{$bucket}."\n"  if $commandlineoption{verbose};
+						print timestamp().'Will keep snapshot:  '.$snapshotname.'='.$snapshottime.' Backup in bucket: $backupbucket{'.$bucket.'}='.$backupbuckets{$bucket}."\n"  if $commandlineoption{verbose};
 					}
 					else
 					{
-						print 'Will remove snapshot:'.$snapshotname.'='.$snapshottime.' Backup in bucket: $backupbucket{'.$bucket.'}='.$backupbuckets{$bucket}."\n";
+						print timestamp().'Will remove snapshot:'.$snapshotname.'='.$snapshottime.' Backup in bucket: $backupbucket{'.$bucket.'}='.$backupbuckets{$bucket}."\n";
 						
 						JNX::ZFS::destroysnapshots( %destination, dataset => $destinationdataset, snapshots => $snapshotname );
 					}
 				}
 				else
 				{
-					print STDERR "snapshot not in YYYY-MM-DD-HHMMSS format: $snapshotname - ignoring\n";
+					print STDERR timestamp()."snapshot not in YYYY-MM-DD-HHMMSS format: $snapshotname - ignoring\n";
 				}
 			}
 		}
@@ -374,7 +374,7 @@ sub jnxparsetimeperbuckethash
 			my $keytime		= jnxparsesimpletime($key);
 			my $valuetime	= jnxparsesimpletime($value);
 
-		 	print "Found Keytime: $keytime Valuetime: $valuetime \n" if $commandlineoption{verbose};
+		 	print timestamp()."Found Keytime: $keytime Valuetime: $valuetime \n" if $commandlineoption{verbose};
 
 			if( ($keytime>=0) && ($valuetime>=0) )
 			{
@@ -382,7 +382,7 @@ sub jnxparsetimeperbuckethash
 			}
 		}
 	}
-	print STDERR __PACKAGE__.'['.__LINE__.']:'."Created buckethash:".Data::Dumper->Dumper(\%timehash) if $commandlineoption{debug};
+	print timestamp().__PACKAGE__.'['.__LINE__.']:'."Created buckethash:".Data::Dumper->Dumper(\%timehash) if $commandlineoption{debug};
 
 	return \%timehash;
 }
@@ -416,7 +416,7 @@ sub jnxparsetimeperfilesystemhash
 			}
 		}
 	}
-	print STDERR __PACKAGE__.'['.__LINE__.']:'."Created timehash:".Data::Dumper->Dumper(\@filesystemarray) if $commandlineoption{debug};
+	print timestamp().__PACKAGE__.'['.__LINE__.']:'."Created timehash:".Data::Dumper->Dumper(\@filesystemarray) if $commandlineoption{debug};
 
 	return @filesystemarray;
 }
@@ -449,7 +449,7 @@ sub bucketfortime
 
 	if( $timetotest > $scriptstarttime )
 	{
-		print __PACKAGE__.'['.__LINE__.']:'."Time found in snapshot:".localtime($timetotest)." is in the future - exiting\n";
+		print timestamp().__PACKAGE__.'['.__LINE__.']:'."Time found in snapshot:".localtime($timetotest)." is in the future - exiting\n";
 		exit EXIT_FAILURE;
 	}
 
@@ -470,10 +470,13 @@ sub bucketfortime
     my $buckettimetouse = $scriptstarttime - ($scriptstarttime % $buckettime) + $buckettime; # align 	
 	my $bucket 			= $timetotest - ($timetotest%$buckettime);
 	
-	print __PACKAGE__.'['.__LINE__.']:'."Timedistance: $timedistance , $timetotest, ".localtime($timetotest)." buckettime:$buckettime bucket:$bucket\n" if $commandlineoption{debug};
+	print timestamp(). __PACKAGE__.'['.__LINE__.']:'."Timedistance: $timedistance , $timetotest, ".localtime($timetotest)." buckettime:$buckettime bucket:$bucket\n" if $commandlineoption{debug};
 	
 	return $bucket;
 }
 
 
+sub timestamp {
 
+	return (strftime "%Y-%m-%d-%H%M%S", localtime).': ';
+}

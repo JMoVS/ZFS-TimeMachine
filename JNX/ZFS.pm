@@ -77,16 +77,16 @@ sub createsnapshot
 
 	return undef if !defined(JNX::System::executecommand( %arguments, command => 'zfs snapshot '.($arguments{recursive}?'-r ':'').'"'.$arguments{dataset}.'@'.$snapshotdate.'"'));
 
-	print STDERR "Created Snapshot: $snapshotname\n" if $arguments{verbose};
+	print STDOUT timestamp()."Created Snapshot: $snapshotname\n" if $arguments{verbose};
 
 	my @snapshots = getsnapshotsfordataset( %arguments );
 	
 	for my $name (reverse @snapshots)
 	{
-		print STDERR "Testing Snapshot: $name\n" if $arguments{verbose};
+		print STDOUT timestamp()."Testing Snapshot: $name\n" if $arguments{verbose};
 		return $snapshotname if $name eq $snapshotdate;
 	}
-	print STDERR 'Could not create snapshot:'.$snapshotname."\n";
+	print STDERR timestamp().'Could not create snapshot:'.$snapshotname."\n";
 	return undef;
 }
 
@@ -122,7 +122,7 @@ sub getsnapshotsfordataset
 		{
 			if( /^([A-Za-z0-9\_\-\s\/\.]+)\@(\S+)\s/ )
 			{
-				print STDERR "Got Snapshot: $arguments{host}: $1\@$2 \n";
+				print STDOUT timestamp()."Got Snapshot: $arguments{host}: $1\@$2 \n" if $arguments{verbose};
 				push(@{$snapshotcache{$arguments{host}}{datasets}{$1}},$2) if length $2>0;
 			}
 			else
@@ -133,7 +133,7 @@ sub getsnapshotsfordataset
 	}
 	else
 	{
-		print STDERR "Serving from cache\n";
+		print STDOUT timestamp()."Serving from cache\n";
 	}
 	my $snapshotsref = $snapshotcache{$arguments{host}}{datasets}{$arguments{dataset}};
 
@@ -176,7 +176,7 @@ sub getsubdatasets
 			}
 			else
 			{
-				print STDERR "Did not match: $_\n";
+				print STDERR timestamp()."Did not match: $_\n";
 			}
 		}
 		
@@ -240,6 +240,11 @@ sub destroysnapshots
 	{
 		JNX::System::executecommand( %arguments, command => 'zfs destroy "'.$arguments{dataset}.'@'.$snapshot.'"' );
 	}
+}
+
+sub timestamp {
+
+	return (strftime "%Y-%m-%d-%H%M%S", localtime).': ';
 }
 
 
