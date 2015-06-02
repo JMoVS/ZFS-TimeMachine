@@ -18,9 +18,11 @@ my %commandlineoption = JNX::Configuration::newFromDefaults( {
 																	'datasets'				=>	['puddle','string'],
 																	'snapshotinterval'		=>	[300,'number'],
 																	'snapshottime'			=>	[10,'number'],
+																	'anyBarPortNumber'		=> 	[1738,'number'],
 
 																	'verbose'				=>	[0,'flag'],
 																	'debug'					=>	[0,'flag'],
+																	'anybarFailureColor'	=> 	['red', 'string'],
 															 }, __PACKAGE__ );
 
 $commandlineoption{verbose}=1 if $commandlineoption{debug};
@@ -36,6 +38,10 @@ JNX::System::checkforrunningmyself($commandlineoption{'datasets'}) || die "Alrea
 
 my $lastwaketime 	= JNX::System::lastwaketime();
 my @datasetstotest	= split(/,/,$commandlineoption{'datasets'});
+
+my $anyBarPortNumber = $commandlineoption{'anyBarPortNumber'};
+
+my $anybarFailureColor = $commandlineoption{'anybarFailureColor'};
 
 for my $datasettotest (@datasetstotest)
 {
@@ -53,15 +59,18 @@ for my $datasettotest (@datasetstotest)
 		if( $lastwaketime + $snapshotoffset < time() )
 		{
 			print STDERR "Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - too old\n";
+			system("/bin/echo -n ".$anybarFailureColor." | nc -4u -w0 localhost ".$anyBarPortNumber);
 			exit 1;
 		}
 		else
 		{
 			print STDERR "Not long enough after reboot\n";
+			system("/bin/echo -n orange | nc -4u -w0 localhost ".$anyBarPortNumber);
 			exit 0;
 		}
 	}
 	print STDERR "Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - ok\n";
+	system("/bin/echo -n black | nc -4u -w0 localhost ".$anyBarPortNumber);
 }
 exit 0;
 
