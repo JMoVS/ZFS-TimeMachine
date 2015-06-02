@@ -45,13 +45,14 @@ else
 	@scrubpools = split( /[,\s]/,$commandlineoption{pools} );
 }
 
-
+my $aPoolHasErrors = 0;
 
 for my $pool (@scrubpools )
 {
 	if( defined $pools{$pool} )
 	{
 		if ($pools{$pool}{scanerrors} > 0) {
+			$aPoolHasErrors = $aPoolHasErrors+1;
 			print STDERR "errors in pool ".$pool;
 			system("/bin/echo -n red | nc -4u -w0 localhost 1740");
 		}
@@ -73,6 +74,8 @@ for my $pool (@scrubpools )
 				system("/bin/echo -n black | nc -4u -w0 localhost 1740");
 			}
 		}
+		if ($aPoolHasErrors > 0) {
+			system("/bin/echo -n red | nc -4u -w0 localhost 1740");
 		}
 	}
 }
