@@ -18,6 +18,7 @@ my %commandlineoption = JNX::Configuration::newFromDefaults( {
 																	'datasets'				=>	['puddle','string'],
 																	'snapshotinterval'		=>	[300,'number'],
 																	'snapshottime'			=>	[10,'number'],
+																	'warningGracePeriod'	=>	[259200,'number'],
 																	'anyBarPortNumber'		=> 	[1738,'number'],
 
 																	'verbose'				=>	[0,'flag'],
@@ -36,10 +37,11 @@ my %host 		= (	host => $commandlineoption{host}, hostoptions => $commandlineopti
 
 JNX::System::checkforrunningmyself($commandlineoption{'datasets'}) || die "Already running which means lookup for snapshots is too slow";
 
-my $lastwaketime 	= JNX::System::lastwaketime();
 my @datasetstotest	= split(/,/,$commandlineoption{'datasets'});
 
 my $anyBarPortNumber = $commandlineoption{'anyBarPortNumber'};
+
+my $warningGracePeriod = $commandlineoption{'warningGracePeriod'};
 
 my $anybarFailureColor = $commandlineoption{'anybarFailureColor'};
 
