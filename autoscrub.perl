@@ -51,14 +51,28 @@ for my $pool (@scrubpools )
 {
 	if( defined $pools{$pool} )
 	{
-		if( $pools{$pool}{lastscrub} < ( time() - (86400*$commandlineoption{scrubinterval})) ) 
-		{
-			die "could not start scrub: $!" if !defined(JNX::System::executecommand(%host, command=> 'zpool scrub '.$pool));
-			print "$pool: starting scrub \n";
+		if ($pools{$pool}{scanerrors} > 0) {
+			print STDERR "errors in pool ".$pool;
+			system("/bin/echo -n red | nc -4u -w0 localhost 1740");
 		}
 		else
 		{
-			print "$pool: no scrub needed\n";
+			if( $pools{$pool}{lastscrub} < ( time() - (86400*$commandlineoption{scrubinterval})) ) 
+			{
+				if (!defined(JNX::System::executecommand(%host, command=> 'zpool scrub '.$pool)))
+				{
+					system("/bin/echo -n red | nc -4u -w0 localhost 1740");
+					die "could not start scrub: $!";
+				}
+				print "$pool: starting scrub \n";
+				system("/bin/echo -n black | nc -4u -w0 localhost 1740");
+			}
+			else
+			{
+				print "$pool: no scrub needed\n";
+				system("/bin/echo -n black | nc -4u -w0 localhost 1740");
+			}
+		}
 		}
 	}
 }
