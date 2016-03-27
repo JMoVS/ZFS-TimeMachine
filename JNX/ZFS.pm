@@ -118,7 +118,7 @@ sub getsnapshotsfordataset
 		delete $snapshotcache{$arguments{host}};
 		$snapshotcache{$arguments{host}}{lasttime}{$arguments{dataset}}=time();
 
-		for (JNX::System::executecommand( %arguments, command => 'zfs list -H -t snapshot -o name -s name -d 1 -r "'.$arguments{dataset}.'"'))
+		for (JNX::System::executecommand( %arguments, command => 'zfs list -H -t snapshot -o name -s creation -d 1 -r "'.$arguments{dataset}.'"'))
 		{
 			if( /^([A-Za-z0-9\_\-\s\/\.]+)\@(\S+)\s/ )
 			{
