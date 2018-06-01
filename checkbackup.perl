@@ -63,7 +63,7 @@ for my $datasettotest (@datasetstotest)
 		{
 			print STDERR timestamp()."Last snapshot for dataset (".$datasettotest."):".localtime($snapshottime)." - too old\n";
 			system("/bin/echo -n ".$anybarFailureColor." | nc -4u -w0 localhost ".$anyBarPortNumber);
-			exit 1;
+			exit 0;
 		}
 		else
 		{

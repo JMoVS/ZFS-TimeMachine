@@ -1,4 +1,7 @@
 #!/bin/bash
 
-perl checkbackup.perl --snapshotinterval 600 --warningGracePeriod 86400 --snapshottime 10 --anybarFailureColor red --anyBarPortNumber 1738 --datasets zfspower/Users,zfspower/Users/justin
-perl checkbackup.perl --snapshotinterval 3600 --warningGracePeriod 86400 --snapshottime 1200 --anybarFailureColor white --anyBarPortNumber 1739 --datasets zfssnaps/backup/Users,zfssnaps/backup/Users/justin
+perl checkbackup.perl --snapshotinterval 3600 --warningGracePeriod 86400 --snapshottime 10 --anybarFailureColor red --anyBarPortNumber 1738 --datasets zfsintern/Users/justin/Cloudy/Dropbox,zfsintern/Users/justin/Documents,zfsintern/Users/justin/Downloads,zfsintern/Users/justin/Library/Application\ Support/Firefox,zfsintern/Users/justin/Library/Application\ Support/MobileSync,zfsintern/Users/justin/Library/Mail,zfsintern/Users/justin/Music
+
+perl checkbackup.perl --snapshotinterval 3600 --warningGracePeriod 86400 --snapshottime 10 --anybarFailureColor white --anyBarPortNumber 1739 --datasets zschock/MinecraftServerBackups,zschock/Steam,zschock/extMovies,zschock/extMusic,zschock/extPictures,zschock/temp,zschock/temp/transcodingstuff
+
+perl checkbackup.perl --snapshotinterval 14400 --warningGracePeriod 259200 --snapshottime 1200 --anybarFailureColor white --anyBarPortNumber 1740 --datasets zfssnaps/zfsintern/Applicationz,zfssnaps/zfsintern/Users/justin/Cloudy/Dropbox,zfssnaps/zfsintern/Users/justin/Documents,zfssnaps/zfsintern/Users/justin/Downloads,zfssnaps/zfsintern/Users/justin/Library/Application\ Support/Firefox,zfssnaps/zfsintern/Users/justin/Library/Mail,zfssnaps/zfsintern/Users/justin/Music,zfssnaps/zschock/MinecraftServerBackups,zfssnaps/zschock/extMovies,zfssnaps/zschock/extPictures,zfssnaps/zschock/temp,zfssnaps/zschock/extMusic
