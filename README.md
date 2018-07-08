@@ -140,8 +140,9 @@ This will scrub your pools every 14 days. If you cancel a scrub that will be rec
 You can start it for different pools as well.
 
 I'm using it in a crontab entry: 
+```
 	1 * * * * cd ~jolly/Binaries/ZFSTimeMachine;./autoscrub.perl >/dev/null 2>&1
-
+```
 
 
 Mac OS X only stuff
